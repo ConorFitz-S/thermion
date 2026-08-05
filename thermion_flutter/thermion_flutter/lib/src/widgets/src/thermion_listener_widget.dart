@@ -271,9 +271,7 @@ class _ThermionListenerWidgetState extends State<ThermionListenerWidget> {
             );
           }
         },
-        onPointerPanZoomStart: (pzs) {
-          throw Exception("TODO - is this a pinch zoom on laptop trackpad?");
-        },
+        onPointerPanZoomStart: (_) {},
         onPointerDown: (event) async {
           widget.focusNode?.requestFocus();
 

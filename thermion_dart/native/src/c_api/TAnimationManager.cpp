@@ -1,5 +1,6 @@
 #include "Log.hpp"
 
+#include <cmath>
 #include <utils/Entity.h>
 #include <gltfio/math.h>
 
@@ -286,6 +287,22 @@ extern "C"
         const auto localTransforms = animationManager->getBoneRestTranforms(instance, skinIndex);
         const auto &joints = filamentInstance->getJointsAt(skinIndex);
         auto &transformManager = animationManager->getEngine()->getTransformManager();
+        const auto normalizeRotation = [](math::quatf rotation) {
+            const auto length = std::sqrt(
+                rotation.x * rotation.x +
+                rotation.y * rotation.y +
+                rotation.z * rotation.z +
+                rotation.w * rotation.w);
+            if (!std::isfinite(length) || length <= 0.0f)
+            {
+                return math::quatf(1.0f);
+            }
+            return math::quatf(
+                rotation.w / length,
+                rotation.x / length,
+                rotation.y / length,
+                rotation.z / length);
+        };
 
         for (int boneIndex = 0; boneIndex < numBones; boneIndex++)
         {
@@ -306,13 +323,13 @@ extern "C"
             math::quatf localRotation;
             filament::gltfio::decomposeMatrix(
                 localTransforms[boneIndex], &translation, &localRotation, &scale);
-            localRotation = filament::math::normalize(localRotation);
+            localRotation = normalizeRotation(localRotation);
 
             const auto worldTransform = inverse(filamentInstance->getInverseBindMatricesAt(skinIndex)[boneIndex]);
             math::quatf worldRotation;
             filament::gltfio::decomposeMatrix(
                 worldTransform, &translation, &worldRotation, &scale);
-            worldRotation = filament::math::normalize(worldRotation);
+            worldRotation = normalizeRotation(worldRotation);
 
             localRotations[(boneIndex * 4) + 0] = localRotation.x;
             localRotations[(boneIndex * 4) + 1] = localRotation.y;

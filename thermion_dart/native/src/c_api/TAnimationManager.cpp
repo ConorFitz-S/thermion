@@ -1,6 +1,7 @@
 #include "Log.hpp"
 
 #include <utils/Entity.h>
+#include <gltfio/math.h>
 
 #include "c_api/APIExport.h"
 #include "scene/AnimationManager.hpp"
@@ -303,11 +304,15 @@ extern "C"
             math::float3 translation;
             math::float3 scale;
             math::quatf localRotation;
-            decomposeMatrix(localTransforms[boneIndex], &translation, &localRotation, &scale);
+            filament::gltfio::decomposeMatrix(
+                localTransforms[boneIndex], &translation, &localRotation, &scale);
+            localRotation = filament::math::normalize(localRotation);
 
             const auto worldTransform = inverse(filamentInstance->getInverseBindMatricesAt(skinIndex)[boneIndex]);
             math::quatf worldRotation;
-            decomposeMatrix(worldTransform, &translation, &worldRotation, &scale);
+            filament::gltfio::decomposeMatrix(
+                worldTransform, &translation, &worldRotation, &scale);
+            worldRotation = filament::math::normalize(worldRotation);
 
             localRotations[(boneIndex * 4) + 0] = localRotation.x;
             localRotations[(boneIndex * 4) + 1] = localRotation.y;

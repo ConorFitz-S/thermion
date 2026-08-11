@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:thermion_dart/src/viewer/viewer.dart';
 
 // abstract class BaseGizmo extends Gizmo {

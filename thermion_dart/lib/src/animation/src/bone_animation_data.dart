@@ -11,6 +11,21 @@ typedef SkeletonTransform = List<Transform>;
 
 typedef SkeletonAnimation = List<SkeletonTransform>;
 
+/// Bind-pose data for one skin joint, in the same order as [getBoneNames].
+class BoneBindTransform {
+  final int boneIndex;
+  final int? parentBoneIndex;
+  final Quaternion localRotation;
+  final Quaternion worldRotation;
+
+  const BoneBindTransform({
+    required this.boneIndex,
+    required this.parentBoneIndex,
+    required this.localRotation,
+    required this.worldRotation,
+  });
+}
+
 ///
 /// Bone space is the coordinate system anchored at the root of a bone
 /// in its rest position, with Y pointing "up" (i.e. towards the "tail" of

@@ -108,6 +108,8 @@ namespace thermion
         /// @return
         std::vector<math::mat4f> getBoneRestTranforms(GltfSceneAssetInstance *instance, int skinIndex);
 
+        filament::Engine *getEngine() const { return mEngine; }
+
         
         /// @param instance
         void resetToRestPose(GltfSceneAssetInstance *instance);

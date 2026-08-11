@@ -499,6 +499,66 @@ class FFIAsset extends ThermionAsset<Pointer<TSceneAsset>> {
     return names;
   }
 
+  @override
+  Future<List<BoneBindTransform>> getBoneBindTransforms({
+    int skinIndex = 0,
+  }) async {
+    if (type != SceneAssetType.gltf) {
+      throw UnimplementedError("getBoneBindTransforms requires a glTF asset");
+    }
+
+    FFIAsset instanceAsset = this;
+    if (!isInstance) {
+      instanceAsset = (await getInstance(0)) as FFIAsset;
+    }
+
+    final boneCount = await instanceAsset.getBoneCount(skinIndex: skinIndex);
+    if (boneCount == 0) {
+      return [];
+    }
+
+    final parentIndices = makeInt32List(boneCount);
+    final localRotations = makeFloat32List(boneCount * 4);
+    final worldRotations = makeFloat32List(boneCount * 4);
+    try {
+      AnimationManager_getBoneBindTransforms(
+        _app.animationManager.animationManager,
+        instanceAsset.getNativeHandle(),
+        skinIndex,
+        parentIndices.address,
+        localRotations.address,
+        worldRotations.address,
+        boneCount,
+      );
+
+      return List.generate(boneCount, (boneIndex) {
+        final offset = boneIndex * 4;
+        return BoneBindTransform(
+          boneIndex: boneIndex,
+          parentBoneIndex: parentIndices[boneIndex] < 0
+              ? null
+              : parentIndices[boneIndex],
+          localRotation: Quaternion(
+            localRotations[offset],
+            localRotations[offset + 1],
+            localRotations[offset + 2],
+            localRotations[offset + 3],
+          ).normalized(),
+          worldRotation: Quaternion(
+            worldRotations[offset],
+            worldRotations[offset + 1],
+            worldRotations[offset + 2],
+            worldRotations[offset + 3],
+          ).normalized(),
+        );
+      });
+    } finally {
+      parentIndices.free();
+      localRotations.free();
+      worldRotations.free();
+    }
+  }
+
   // Gets the number of bones at skin [skinIndex].
   // Returns the number of bones, or 0 if none found.
   Future<int> getBoneCount({int skinIndex = 0}) async {

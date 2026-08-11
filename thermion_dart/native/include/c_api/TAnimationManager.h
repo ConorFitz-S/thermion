@@ -53,6 +53,15 @@ extern "C"
 		float *const out,
 		int numBones);
 
+	EMSCRIPTEN_KEEPALIVE void AnimationManager_getBoneBindTransforms(
+		TAnimationManager *tAnimationManager,
+		TSceneAsset *sceneAsset,
+		int skinIndex,
+		int32_t *const parentIndices,
+		float *const localRotations,
+		float *const worldRotations,
+		int numBones);
+
 	EMSCRIPTEN_KEEPALIVE void AnimationManager_getInverseBindMatrix(
 		TAnimationManager *tAnimationManager,
 		TSceneAsset *sceneAsset,

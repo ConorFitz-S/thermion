@@ -256,6 +256,70 @@ extern "C"
         }
     }
 
+    EMSCRIPTEN_KEEPALIVE void AnimationManager_getBoneBindTransforms(
+        TAnimationManager *tAnimationManager,
+        TSceneAsset *sceneAsset,
+        int skinIndex,
+        int32_t *const parentIndices,
+        float *const localRotations,
+        float *const worldRotations,
+        int numBones)
+    {
+        auto *animationManager = reinterpret_cast<AnimationManager *>(tAnimationManager);
+        auto asset = reinterpret_cast<SceneAsset *>(sceneAsset);
+        if (asset->getType() != SceneAsset::SceneAssetType::Gltf || !asset->isInstance())
+        {
+            LOG_ERROR("AnimationManager_getBoneBindTransforms requires a GltfSceneAssetInstance");
+            return;
+        }
+
+        auto *instance = reinterpret_cast<GltfSceneAssetInstance *>(asset);
+        auto *filamentInstance = instance->getInstance();
+        const auto boneCount = filamentInstance->getJointCountAt(skinIndex);
+        if (boneCount != numBones)
+        {
+            LOG_ERROR("Expected %d bones but the skin contains %d", numBones, boneCount);
+            return;
+        }
+
+        const auto localTransforms = animationManager->getBoneRestTranforms(instance, skinIndex);
+        const auto &joints = filamentInstance->getJointsAt(skinIndex);
+        auto &transformManager = animationManager->getEngine()->getTransformManager();
+
+        for (int boneIndex = 0; boneIndex < numBones; boneIndex++)
+        {
+            const auto joint = joints[boneIndex];
+            const auto parent = transformManager.getParent(transformManager.getInstance(joint));
+            parentIndices[boneIndex] = -1;
+            for (int candidateIndex = 0; candidateIndex < numBones; candidateIndex++)
+            {
+                if (joints[candidateIndex] == parent)
+                {
+                    parentIndices[boneIndex] = candidateIndex;
+                    break;
+                }
+            }
+
+            math::float3 translation;
+            math::float3 scale;
+            math::quatf localRotation;
+            decomposeMatrix(localTransforms[boneIndex], &translation, &localRotation, &scale);
+
+            const auto worldTransform = inverse(filamentInstance->getInverseBindMatricesAt(skinIndex)[boneIndex]);
+            math::quatf worldRotation;
+            decomposeMatrix(worldTransform, &translation, &worldRotation, &scale);
+
+            localRotations[(boneIndex * 4) + 0] = localRotation.x;
+            localRotations[(boneIndex * 4) + 1] = localRotation.y;
+            localRotations[(boneIndex * 4) + 2] = localRotation.z;
+            localRotations[(boneIndex * 4) + 3] = localRotation.w;
+            worldRotations[(boneIndex * 4) + 0] = worldRotation.x;
+            worldRotations[(boneIndex * 4) + 1] = worldRotation.y;
+            worldRotations[(boneIndex * 4) + 2] = worldRotation.z;
+            worldRotations[(boneIndex * 4) + 3] = worldRotation.w;
+        }
+    }
+
     EMSCRIPTEN_KEEPALIVE void AnimationManager_getInverseBindMatrix(
         TAnimationManager *tAnimationManager,
         TSceneAsset *sceneAsset,

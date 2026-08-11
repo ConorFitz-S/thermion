@@ -263,6 +263,13 @@ abstract class ThermionAsset<T> extends NativeHandle<T> {
     throw UnimplementedError();
   }
 
+  // Returns parent indices and bind-pose rotations for all bones in the same
+  // ordering as [getBoneNames]. World rotations are relative to the asset
+  // root, and local rotations are relative to each bone's parent.
+  Future<List<BoneBindTransform>> getBoneBindTransforms({int skinIndex = 0}) {
+    throw UnimplementedError();
+  }
+
   // Gets the number of bones for the given skinning index.
   Future<int> getBoneCount({int skinIndex = 0}) {
     throw UnimplementedError();

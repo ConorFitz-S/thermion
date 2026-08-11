@@ -657,119 +657,215 @@ class FFIAsset extends ThermionAsset<Pointer<TSceneAsset>> {
   // Currently, scale is not supported.
   //
   @override
-  Future addBoneAnimation(
-    BoneAnimationData animation, {
-    int skinIndex = 0,
-    double fadeOutInSecs = 0.0,
-    double fadeInInSecs = 0.0,
-    double maxDelta = 1.0,
-    bool loop = false,
-  }) async {
-    if (animation.space != Space.Bone &&
-        animation.space != Space.ParentWorldRotation) {
-      throw UnimplementedError("TODO - support ${animation.space}");
-    }
-    if (skinIndex != 0) {
-      throw UnimplementedError("TODO - support skinIndex != 0 ");
-    }
-    // Resolve to instance(0) if this is a top-level asset — the native
-    // bone APIs (getBoneCount, getBones, getRestLocalTransforms) require
-    // a GltfSceneAssetInstance, not a GltfSceneAsset.
-    FFIAsset instanceAsset = this;
-    if (!isInstance) {
-      try {
-        instanceAsset = (await getInstance(0)) as FFIAsset;
-      } catch (_) {
-        // Fall through with self
-      }
-    }
-    var boneNames = await instanceAsset.getBoneNames(skinIndex: skinIndex);
-    var restLocalTransformsData = await _app.animationManager
-        .getRestLocalTransforms(instanceAsset, skinIndex);
-    var restLocalTransforms = <Matrix4>[];
-    for (int i = 0; i < boneNames.length; i++) {
-      var values = <double>[];
-      for (int j = 0; j < 16; j++) {
-        values.add(restLocalTransformsData[(i * 16) + j]);
-      }
-      restLocalTransforms.add(Matrix4.fromList(values));
-    }
+Future addBoneAnimation(
+  BoneAnimationData animation, {
+  int skinIndex = 0,
+  double fadeOutInSecs = 0.0,
+  double fadeInInSecs = 0.0,
+  double maxDelta = 1.0,
+  bool loop = false,
+}) async {
+  if (animation.space != Space.Bone &&
+      animation.space != Space.World &&
+      animation.space != Space.ParentWorldRotation) {
+    throw UnimplementedError("TODO - support ${animation.space}");
+  }
 
-    var numFrames = animation.frameData.length;
+  if (skinIndex != 0) {
+    throw UnimplementedError("TODO - support skinIndex != 0");
+  }
 
-    var data = makeFloat32List(numFrames * 16);
-
+  // The native bone APIs require a GltfSceneAssetInstance.
+  FFIAsset instanceAsset = this;
+  if (!isInstance) {
     try {
-      var bones = await instanceAsset.getBones(skinIndex: skinIndex);
-
-      for (int i = 0; i < animation.bones.length; i++) {
-        var boneName = animation.bones[i];
-        var entityBoneIndex = boneNames.indexOf(boneName);
-        if (entityBoneIndex == -1) {
-          _logger.warning("Bone $boneName not found, skipping");
-          continue;
-        }
-        var boneEntity = bones[entityBoneIndex];
-
-        var baseTransform = restLocalTransforms[entityBoneIndex];
-
-        var world = Matrix4.identity();
-        // this odd use of ! is intentional, without it, the WASM optimizer gets
-        // in trouble
-        var parentBoneEntity = (await _app.getParent(boneEntity))!;
-        while (true) {
-          if (!bones.contains(parentBoneEntity!)) {
-            break;
-          }
-          world = restLocalTransforms[bones.indexOf(parentBoneEntity!)] * world;
-          parentBoneEntity = (await _app.getParent(parentBoneEntity))!;
-        }
-
-        world = Matrix4.identity()..setRotation(world.getRotation());
-        var worldInverse = Matrix4.identity()..copyInverse(world);
-
-        for (int frameNum = 0; frameNum < numFrames; frameNum++) {
-          var rotation = animation.frameData[frameNum][i].rotation;
-          var translation = animation.frameData[frameNum][i].translation;
-          var frameTransform = Matrix4.compose(
-            translation,
-            rotation,
-            Vector3.all(1.0),
-          );
-          var newLocalTransform = frameTransform.clone();
-          if (animation.space == Space.Bone) {
-            newLocalTransform = baseTransform * frameTransform;
-          } else if (animation.space == Space.ParentWorldRotation) {
-            newLocalTransform =
-                baseTransform * (worldInverse * frameTransform * world);
-          }
-          for (int j = 0; j < 16; j++) {
-            data[(frameNum * 16) + j] = newLocalTransform.storage[j];
-          }
-        }
-
-        var frameDataList = <double>[];
-        for (int i = 0; i < numFrames * 16; i++) {
-          frameDataList.add(data[i]);
-        }
-
-        await _app.animationManager.addBoneAnimation(
-          this,
-          skinIndex,
-          entityBoneIndex,
-          frameDataList,
-          numFrames,
-          animation.frameLengthInMs,
-          fadeOutInSecs: fadeOutInSecs,
-          fadeInInSecs: fadeInInSecs,
-          maxDelta: maxDelta,
-          loop: loop,
-        );
-      }
-    } finally {
-      data.free();
+      instanceAsset = (await getInstance(0)) as FFIAsset;
+    } catch (_) {
+      // Fall back to this asset. The native API also resolves the first
+      // instance when passed the owning asset.
     }
   }
+
+  final boneNames = await instanceAsset.getBoneNames(
+    skinIndex: skinIndex,
+  );
+
+  final restLocalTransformsData = await _app.animationManager
+      .getRestLocalTransforms(instanceAsset, skinIndex);
+
+  final restLocalTransforms = <Matrix4>[];
+
+  for (int boneIndex = 0; boneIndex < boneNames.length; boneIndex++) {
+    final values = <double>[];
+
+    for (int valueIndex = 0; valueIndex < 16; valueIndex++) {
+      values.add(
+        restLocalTransformsData[(boneIndex * 16) + valueIndex],
+      );
+    }
+
+    restLocalTransforms.add(Matrix4.fromList(values));
+  }
+
+  final bones = await instanceAsset.getBones(
+    skinIndex: skinIndex,
+  );
+
+  final numFrames = animation.frameData.length;
+  final data = makeFloat32List(numFrames * 16);
+
+  // Bone animation matrices are ultimately consumed by Filament as local
+  // transforms relative to each bone's parent.
+  //
+  // The native animation API operates in model space. Therefore, when the
+  // caller provides a World-space delta, it must be converted through the
+  // asset's world transform before being converted to bone-local space.
+  final assetWorldTransform = await getWorldTransform(
+    entity: this.entity,
+  );
+
+  final assetWorldInverse = Matrix4.identity()
+    ..copyInverse(assetWorldTransform);
+
+  try {
+    for (int animationBoneIndex = 0;
+        animationBoneIndex < animation.bones.length;
+        animationBoneIndex++) {
+      final boneName = animation.bones[animationBoneIndex];
+      final entityBoneIndex = boneNames.indexOf(boneName);
+
+      if (entityBoneIndex == -1) {
+        _logger.warning("Bone $boneName not found, skipping");
+        continue;
+      }
+
+      final boneEntity = bones[entityBoneIndex];
+      final baseTransform = restLocalTransforms[entityBoneIndex];
+
+      // Build the selected bone parent's rest transform in model space.
+      //
+      // If the selected bone's immediate parent is not itself a skeleton
+      // joint, the parent model transform is identity from the animation
+      // system's point of view.
+      var parentRestModel = Matrix4.identity();
+      var parentBoneEntity = await _app.getParent(boneEntity);
+
+      while (parentBoneEntity != null &&
+          bones.contains(parentBoneEntity)) {
+        final parentIndex = bones.indexOf(parentBoneEntity);
+
+        // Traversal goes from the immediate parent towards the root, so
+        // prepend each transform to obtain:
+        //
+        // root * ... * parent
+        parentRestModel =
+            restLocalTransforms[parentIndex] * parentRestModel;
+
+        parentBoneEntity = await _app.getParent(parentBoneEntity);
+      }
+
+      final parentRestModelInverse = Matrix4.identity()
+        ..copyInverse(parentRestModel);
+
+      // Rest transform of the selected bone in model space.
+      final restBoneModel = parentRestModel * baseTransform;
+
+      for (int frameNum = 0; frameNum < numFrames; frameNum++) {
+        final frame = animation.frameData[frameNum][animationBoneIndex];
+
+        final frameTransform = Matrix4.compose(
+          frame.translation,
+          frame.rotation,
+          Vector3.all(1.0),
+        );
+
+        late Matrix4 newLocalTransform;
+
+        switch (animation.space) {
+          case Space.Bone:
+            // The frame is a delta in the bone's rest-local coordinate system.
+            newLocalTransform = baseTransform * frameTransform;
+            break;
+
+          case Space.ParentWorldRotation:
+            // The frame rotates around the parent bone's origin, using world
+            // orientation for its axes. Translation is intentionally excluded
+            // from the basis conversion for this legacy space.
+            final parentRotation = Matrix4.identity()
+              ..setRotation(parentRestModel.getRotation());
+
+            final parentRotationInverse = Matrix4.identity()
+              ..copyInverse(parentRotation);
+
+            newLocalTransform =
+                baseTransform *
+                parentRotationInverse *
+                frameTransform *
+                parentRotation;
+            break;
+
+          case Space.World:
+            // The frame is a delta in scene/world space.
+            //
+            // Convert the rest bone from model space to world space:
+            //
+            //   restBoneWorld = assetWorld * restBoneModel
+            //
+            // Apply the world-space delta:
+            //
+            //   desiredBoneWorld = frameWorld * restBoneWorld
+            //
+            // Convert back to model space and finally to the bone's local
+            // coordinate system:
+            //
+            //   local =
+            //     inverse(parentRestModel) *
+            //     inverse(assetWorld) *
+            //     frameWorld *
+            //     assetWorld *
+            //     restBoneModel
+            newLocalTransform =
+                parentRestModelInverse *
+                assetWorldInverse *
+                frameTransform *
+                assetWorldTransform *
+                restBoneModel;
+            break;
+
+          case Space.Model:
+            throw UnimplementedError(
+              "TODO - support ${animation.space}",
+            );
+        }
+
+        for (int valueIndex = 0; valueIndex < 16; valueIndex++) {
+          data[(frameNum * 16) + valueIndex] =
+              newLocalTransform.storage[valueIndex];
+        }
+      }
+
+      final frameDataList = <double>[
+        for (int valueIndex = 0; valueIndex < numFrames * 16; valueIndex++)
+          data[valueIndex],
+      ];
+
+      await _app.animationManager.addBoneAnimation(
+        this,
+        skinIndex,
+        entityBoneIndex,
+        frameDataList,
+        numFrames,
+        animation.frameLengthInMs,
+        fadeOutInSecs: fadeOutInSecs,
+        fadeInInSecs: fadeInInSecs,
+        maxDelta: maxDelta,
+        loop: loop,
+      );
+    }
+  } finally {
+    data.free();
+  }
+}
 
   //
   Future<Matrix4> getLocalTransform({ThermionEntity? entity}) async {

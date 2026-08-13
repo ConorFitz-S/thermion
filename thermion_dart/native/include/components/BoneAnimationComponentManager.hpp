@@ -35,6 +35,7 @@ namespace thermion
         float fadeOutInSecs = 0;
         float fadeInInSecs = 0;
         float maxDelta = 1.0f;
+        bool hasPendingTime = false;
     };
 
     /// @brief 
@@ -56,6 +57,8 @@ namespace thermion
             
             void addAnimationComponent(FilamentInstance *target);
             void removeAnimationComponent(FilamentInstance *target);
+            int getAnimationCount(FilamentInstance *target);
+            bool setAnimationTime(FilamentInstance *target, float timeInSeconds, uint64_t frameTimeInNanos);
             void update(uint64_t frameTimeInNanos); 
 
         private:

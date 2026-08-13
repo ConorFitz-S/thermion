@@ -3074,6 +3074,15 @@ extension type GeneratedBindings(NativeLibrary _) implements JSObject {
     int animationIndex,
     double timeInSeconds,
   );
+  external int _AnimationManager_setBoneAnimationTime(
+    Pointer<TAnimationManager> tAnimationManager,
+    Pointer<TSceneAsset> tSceneAsset,
+    double timeInSeconds,
+  );
+  external int _AnimationManager_getBoneAnimationCount(
+    Pointer<TAnimationManager> tAnimationManager,
+    Pointer<TSceneAsset> tSceneAsset,
+  );
   external void _MovementIntentExecutor_destroy(
     Pointer<TMovementIntentExecutor> executor,
   );
@@ -11232,6 +11241,30 @@ bool AnimationManager_setGltfAnimationTime(
         timeInSeconds,
       );
   return result == 1;
+}
+
+bool AnimationManager_setBoneAnimationTime(
+  Pointer<TAnimationManager> tAnimationManager,
+  Pointer<TSceneAsset> tSceneAsset,
+  double timeInSeconds,
+) {
+  final result = GeneratedBindings.instance
+      ._AnimationManager_setBoneAnimationTime(
+        tAnimationManager.cast(),
+        tSceneAsset.cast(),
+        timeInSeconds,
+      );
+  return result == 1;
+}
+
+int AnimationManager_getBoneAnimationCount(
+  Pointer<TAnimationManager> tAnimationManager,
+  Pointer<TSceneAsset> tSceneAsset,
+) {
+  return GeneratedBindings.instance._AnimationManager_getBoneAnimationCount(
+    tAnimationManager.cast(),
+    tSceneAsset.cast(),
+  );
 }
 
 void MovementIntentExecutor_destroy(Pointer<TMovementIntentExecutor> executor) {

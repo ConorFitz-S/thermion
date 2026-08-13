@@ -1,4 +1,6 @@
 #include <cstdint>
+#include <algorithm>
+#include <cmath>
 #include <variant>
 
 #include "components/BoneAnimationComponentManager.hpp"
@@ -25,6 +27,63 @@ namespace thermion
         }
     }
 
+    int BoneAnimationComponentManager::getAnimationCount(FilamentInstance *target)
+    {
+        if (!hasComponent(target->getRoot()))
+        {
+            return 0;
+        }
+        auto componentInstance = getInstance(target->getRoot());
+        return static_cast<int>(elementAt<0>(componentInstance).animations.size());
+    }
+
+    bool BoneAnimationComponentManager::setAnimationTime(FilamentInstance *target, float timeInSeconds, uint64_t frameTimeInNanos)
+    {
+        if (!hasComponent(target->getRoot()))
+        {
+            return false;
+        }
+
+        auto componentInstance = getInstance(target->getRoot());
+        auto &boneAnimations = elementAt<0>(componentInstance).animations;
+        if (boneAnimations.empty())
+        {
+            return false;
+        }
+
+        if (!std::isfinite(timeInSeconds))
+        {
+            return false;
+        }
+        timeInSeconds = std::max(0.0f, timeInSeconds);
+        const auto timeInNanos = static_cast<uint64_t>(timeInSeconds * 1'000'000'000.0f);
+        for (auto &animation : boneAnimations)
+        {
+            if (frameTimeInNanos == 0)
+            {
+                animation.startOffset = timeInSeconds;
+                animation.hasPendingTime = true;
+                animation.hasStartTime = false;
+            }
+            else
+            {
+                if (frameTimeInNanos >= timeInNanos)
+                {
+                    animation.startTimeInNanos = frameTimeInNanos - timeInNanos;
+                    animation.startOffset = 0.0f;
+                }
+                else
+                {
+                    animation.startTimeInNanos = 0;
+                    animation.startOffset = timeInSeconds - (float(frameTimeInNanos) / 1'000'000'000.0f);
+                }
+                animation.hasStartTime = true;
+                animation.hasPendingTime = false;
+            }
+        }
+        return true;
+    }
+
     void BoneAnimationComponentManager::update(uint64_t frameTimeInNanos)
     {
         TRACE("Updating %d BoneAnimation components at frame time %d", getComponentCount(), frameTimeInNanos);
@@ -47,10 +106,15 @@ namespace thermion
                 auto &animationStatus = boneAnimations[i];
 
                 // Initialize start time on first use
-                if (animationStatus.startTimeInNanos == 0)
+                if (!animationStatus.hasStartTime)
                 {
                     animationStatus.startTimeInNanos = frameTimeInNanos;
-                    continue;
+                    animationStatus.hasStartTime = true;
+                    if (!animationStatus.hasPendingTime)
+                    {
+                        continue;
+                    }
+                    animationStatus.hasPendingTime = false;
                 }
 
                 uint64_t elapsedInNanos = frameTimeInNanos - animationStatus.startTimeInNanos;
@@ -163,6 +227,8 @@ namespace thermion
                 if (animationStatus.loop && elapsedInSeconds >= (animationStatus.durationInSecs + animationStatus.fadeInInSecs + animationStatus.fadeOutInSecs))
                 {
                     animationStatus.startTimeInNanos = frameTimeInNanos;
+                    animationStatus.startOffset = 0.0f;
+                    animationStatus.hasStartTime = true;
                 }
             }
         }

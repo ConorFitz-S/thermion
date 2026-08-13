@@ -342,6 +342,39 @@ class FFIAnimationManager extends AnimationManager<Pointer<TAnimationManager>> {
   }
 
   @override
+  Future<bool> setBoneAnimationTime(
+    ThermionAsset asset,
+    double timeInSeconds,
+  ) async {
+    if (asset.type != SceneAssetType.gltf &&
+        asset.type != SceneAssetType.geometry) {
+      throw UnimplementedError("TODO");
+    }
+
+    if (!asset.isInstance) {
+      asset = (await asset.getInstances())[0];
+    }
+
+    return AnimationManager_setBoneAnimationTime(
+      animationManager,
+      asset.getNativeHandle(),
+      timeInSeconds,
+    );
+  }
+
+  @override
+  Future<int> getBoneAnimationCount(ThermionAsset asset) async {
+    if (!asset.isInstance) {
+      asset = (await asset.getInstances())[0];
+    }
+
+    return AnimationManager_getBoneAnimationCount(
+      animationManager,
+      asset.getNativeHandle(),
+    );
+  }
+
+  @override
   Future<List<double>> getRestLocalTransforms(
     ThermionAsset asset,
     int skinIndex,

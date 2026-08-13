@@ -181,6 +181,16 @@ abstract class AnimationManager<T> extends NativeHandle<T> {
     bool loop,
   });
 
+  // Sets the current time for all custom bone animations on [asset].
+  // The animation data remains installed and is not registered again.
+  Future<bool> setBoneAnimationTime(
+    ThermionAsset asset,
+    double timeInSeconds,
+  );
+
+  // Gets the number of custom bone animations currently installed on [asset].
+  Future<int> getBoneAnimationCount(ThermionAsset asset);
+
   // Gets the rest pose local transforms for all bones in a skin.
   //
   // [asset] The asset containing the bones

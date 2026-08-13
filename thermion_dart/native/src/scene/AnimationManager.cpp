@@ -335,6 +335,19 @@ namespace thermion
         return true;
     }
 
+    bool AnimationManager::setBoneAnimationTime(GltfSceneAssetInstance *instance, float timeInSeconds)
+    {
+        std::lock_guard lock(mMutex);
+        return mBoneAnimationComponentManager->setAnimationTime(
+            instance->getInstance(), timeInSeconds, mLastUpdateTime);
+    }
+
+    int AnimationManager::getBoneAnimationCount(GltfSceneAssetInstance *instance)
+    {
+        std::lock_guard lock(mMutex);
+        return mBoneAnimationComponentManager->getAnimationCount(instance->getInstance());
+    }
+
     void AnimationManager::playGltfAnimation(GltfSceneAssetInstance *instance, int index, bool loop, bool reverse, bool replaceActive, float crossfade, float startOffset, float speed)
     {
         std::lock_guard lock(mMutex);

@@ -8,6 +8,7 @@ namespace thermion
     {
         // The frame time (in nanoseconds) when this animation started playing.
         uint64_t startTimeInNanos = 0;
+        bool hasStartTime = false;
 
         // Whether the animation should be played from its first frame, or at some later time.
         float startOffset = 0.0f;

@@ -5884,6 +5884,23 @@ external bool AnimationManager_addBoneAnimation(
 );
 
 @ffi.Native<
+    ffi.Bool Function(ffi.Pointer<TAnimationManager>, ffi.Pointer<TSceneAsset>,
+        ffi.Float)>(isLeaf: true)
+external bool AnimationManager_setBoneAnimationTime(
+  ffi.Pointer<TAnimationManager> tAnimationManager,
+  ffi.Pointer<TSceneAsset> tSceneAsset,
+  double timeInSeconds,
+);
+
+@ffi.Native<
+    ffi.Int Function(ffi.Pointer<TAnimationManager>, ffi.Pointer<TSceneAsset>)>(
+    isLeaf: true)
+external int AnimationManager_getBoneAnimationCount(
+  ffi.Pointer<TAnimationManager> tAnimationManager,
+  ffi.Pointer<TSceneAsset> tSceneAsset,
+);
+
+@ffi.Native<
     ffi.Void Function(ffi.Pointer<TAnimationManager>, ffi.Pointer<TSceneAsset>,
         ffi.Int, ffi.Pointer<ffi.Float>, ffi.Int)>(isLeaf: true)
 external void AnimationManager_getRestLocalTransforms(

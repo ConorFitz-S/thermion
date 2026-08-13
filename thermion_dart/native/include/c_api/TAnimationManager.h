@@ -46,6 +46,15 @@ extern "C"
 		float maxDelta, 
 		bool loop);
 
+	EMSCRIPTEN_KEEPALIVE bool AnimationManager_setBoneAnimationTime(
+		TAnimationManager *tAnimationManager,
+		TSceneAsset *tSceneAsset,
+		float timeInSeconds);
+
+	EMSCRIPTEN_KEEPALIVE int AnimationManager_getBoneAnimationCount(
+		TAnimationManager *tAnimationManager,
+		TSceneAsset *tSceneAsset);
+
 	EMSCRIPTEN_KEEPALIVE void AnimationManager_getRestLocalTransforms(
 		TAnimationManager *tAnimationManager,
 		TSceneAsset *sceneAsset,

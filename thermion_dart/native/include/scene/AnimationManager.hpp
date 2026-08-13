@@ -102,6 +102,10 @@ namespace thermion
             float maxDelta,
             bool loop = false);
 
+        /// Sets the current time for all custom bone animations on an instance.
+        bool setBoneAnimationTime(GltfSceneAssetInstance *instance, float timeInSeconds);
+        int getBoneAnimationCount(GltfSceneAssetInstance *instance);
+
         
         /// @param instance
         /// @param skinIndex
@@ -191,6 +195,6 @@ namespace thermion
         std::unique_ptr<GltfAnimationComponentManager> mGltfAnimationComponentManager;
         std::unique_ptr<MorphAnimationComponentManager> mMorphAnimationComponentManager;
         std::unique_ptr<BoneAnimationComponentManager> mBoneAnimationComponentManager;
-        uint64_t mLastUpdateTime;
+        uint64_t mLastUpdateTime = 0;
     };
 }

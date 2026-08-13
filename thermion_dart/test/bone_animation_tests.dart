@@ -138,6 +138,48 @@ void main() async {
     });
   });
 
+  test(
+    'custom bone animation can be scrubbed without re-registering',
+    () async {
+      await ViewerBuilder(testHelper).execute((result) async {
+        final cube = await result.viewer.loadGltf(
+          "${testHelper.assetsDir}/cube_with_morph_targets.glb",
+          addToScene: true,
+        );
+        final animation = BoneAnimationData(
+          ["MyBone"],
+          [
+            [
+              (
+                rotation: Quaternion.identity(),
+                translation: Vector3.zero(),
+              ),
+            ],
+            [
+              (
+                rotation: Quaternion.axisAngle(Vector3(0, 1, 0), pi / 2),
+                translation: Vector3.zero(),
+              ),
+            ],
+          ],
+          frameLengthInMs: 500.0,
+          space: Space.Bone,
+        );
+
+        await cube.addBoneAnimation(animation, loop: true);
+        final am = FilamentApp.instance!.animationManager;
+        expect(await am.getBoneAnimationCount(cube), 1);
+
+        await am.update(1_000_000_000);
+        for (var i = 0; i < 120; i++) {
+          await am.setBoneAnimationTime(cube, (i % 10) / 20.0);
+          await am.update(1_000_000_001 + i);
+          expect(await am.getBoneAnimationCount(cube), 1);
+        }
+      });
+    },
+  );
+
   test('resetToRestPose restores original pose visually', () async {
     await testHelper.withViewer(
       (viewer) async {

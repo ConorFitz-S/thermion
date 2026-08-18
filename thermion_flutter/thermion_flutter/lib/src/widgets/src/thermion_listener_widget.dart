@@ -277,7 +277,41 @@ class _ThermionListenerWidgetState extends State<ThermionListenerWidget> {
             );
           }
         },
-        onPointerPanZoomStart: (_) {},
+        onPointerPanZoomStart: (event) {
+          widget.inputHandler.handle(
+            ScaleStartEvent(
+              numPointers: 2,
+              localFocalPoint: (
+                event.localPosition.dx * pixelRatio,
+                event.localPosition.dy * pixelRatio,
+              ),
+            ),
+          );
+        },
+        onPointerPanZoomUpdate: (event) {
+          widget.inputHandler.handle(
+            ScaleUpdateEvent(
+              numPointers: 2,
+              localFocalPoint: (
+                event.localPosition.dx * pixelRatio,
+                event.localPosition.dy * pixelRatio,
+              ),
+              localFocalPointDelta: (
+                event.panDelta.dx * pixelRatio,
+                event.panDelta.dy * pixelRatio,
+              ),
+              rotation: event.rotation,
+              horizontalScale: event.scale,
+              verticalScale: event.scale,
+              scale: event.scale,
+            ),
+          );
+        },
+        onPointerPanZoomEnd: (event) {
+          widget.inputHandler.handle(
+            ScaleEndEvent(numPointers: 2),
+          );
+        },
         onPointerDown: (event) async {
           widget.focusNode?.requestFocus();
 

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:thermion_dart/thermion_dart.dart';
 import 'ffi_filament_app.dart';
 import 'ffi_material.dart';
-import 'ffi_view.dart';
 
 class FFIGizmo extends GizmoAsset {
   final Set<ThermionEntity> entities;

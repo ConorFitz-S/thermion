@@ -2,7 +2,6 @@ import 'package:thermion_dart/src/filament/src/implementation/ffi_filament_app.d
 import 'package:thermion_dart/src/filament/src/implementation/ffi_texture.dart';
 import 'package:thermion_dart/src/filament/src/interface/ktx1_bundle.dart';
 import 'package:thermion_dart/thermion_dart.dart';
-import 'ffi_filament_app.dart';
 
 class FFIKtx1Bundle extends Ktx1Bundle {
   final Pointer<TKtx1Bundle> pointer;

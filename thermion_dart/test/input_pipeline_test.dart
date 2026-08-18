@@ -1,9 +1,6 @@
 import 'package:test/test.dart';
-import 'package:thermion_dart/src/transform_pipeline/src/input_configuration.dart';
-import 'package:thermion_dart/src/transform_pipeline/src/intent_action.dart';
 import 'package:thermion_dart/src/transform_pipeline/transform_pipeline.dart';
 import 'package:thermion_dart/thermion_dart.dart';
-import 'package:thermion_dart/src/bindings/bindings.dart';
 
 void main() {
   group('InputConfiguration', () {

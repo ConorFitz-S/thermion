@@ -159,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ThermionListenerWidget(
                     inputHandler: DelegateInputHandler.fixedOrbit(
                         _thermionViewer!,
-                        sensitivity: InputSensitivityOptions(
+                        sensitivity: const InputSensitivityOptions(
                             scrollWheelSensitivity: 0.005)),
                     child: ThermionWidget(
                       viewer: _thermionViewer!,

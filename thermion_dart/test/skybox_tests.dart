@@ -1,7 +1,5 @@
 @Timeout(const Duration(seconds: 600))
 import 'package:test/test.dart';
-import 'package:thermion_dart/src/filament/src/implementation/ffi_scene.dart';
-import 'package:thermion_dart/src/viewer/src/ffi/src/thermion_viewer_ffi.dart';
 import 'package:thermion_dart/thermion_dart.dart';
 import 'helpers.dart';
 

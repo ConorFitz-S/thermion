@@ -1,5 +1,4 @@
 import 'package:thermion_dart/src/filament/src/interface/native_handle.dart';
-import 'package:thermion_dart/src/filament/src/interface/filament_app.dart';
 import 'package:thermion_dart/src/filament/src/implementation/ffi_filament_app.dart';
 import 'package:thermion_dart/src/filament/src/implementation/ffi_tone_mapper.dart';
 

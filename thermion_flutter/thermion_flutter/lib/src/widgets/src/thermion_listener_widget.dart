@@ -262,12 +262,18 @@ class _ThermionListenerWidgetState extends State<ThermionListenerWidget> {
         },
         onPointerSignal: (PointerSignalEvent pointerSignal) async {
           if (pointerSignal is PointerScrollEvent) {
-            widget.inputHandler.handle(
-              ScrollEvent(
-                localPosition:
-                    pointerSignal.localPosition.toVector2() * pixelRatio,
-                delta: pointerSignal.scrollDelta.dy * pixelRatio,
-              ),
+            GestureBinding.instance.pointerSignalResolver.register(
+              pointerSignal,
+              (PointerSignalEvent resolvedSignal) {
+                final scrollEvent = resolvedSignal as PointerScrollEvent;
+                widget.inputHandler.handle(
+                  ScrollEvent(
+                    localPosition:
+                        scrollEvent.localPosition.toVector2() * pixelRatio,
+                    delta: scrollEvent.scrollDelta.dy * pixelRatio,
+                  ),
+                );
+              },
             );
           }
         },

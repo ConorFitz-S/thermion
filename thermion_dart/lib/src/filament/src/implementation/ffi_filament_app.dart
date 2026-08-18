@@ -439,7 +439,7 @@ class FFIFilamentApp extends FilamentApp<Pointer> {
     // animators bound to the Engine, and NameComponentManager is standalone.
     await withVoidCallback(
       (requestId, cb) => AnimationManager_destroyRenderThread(
-        (animationManager as FFIAnimationManager).animationManager,
+        (animationManager).animationManager,
         requestId,
         cb,
       ),

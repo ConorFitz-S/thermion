@@ -1,6 +1,5 @@
 import 'package:thermion_dart/src/filament/src/interface/native_handle.dart';
 import 'package:thermion_dart/thermion_dart.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 enum SamplerCompareFunction {
   /// !< Less or equal

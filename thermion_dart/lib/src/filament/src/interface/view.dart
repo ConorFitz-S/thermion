@@ -1,5 +1,4 @@
 import 'package:thermion_dart/src/filament/src/implementation/highlight_overlay_manager.dart';
-import 'package:thermion_dart/src/filament/src/interface/layers.dart';
 import 'package:thermion_dart/src/filament/src/interface/native_handle.dart';
 import 'package:thermion_dart/src/filament/src/interface/scene.dart';
 import 'package:thermion_dart/thermion_dart.dart';

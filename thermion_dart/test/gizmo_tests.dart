@@ -1,5 +1,3 @@
-import 'package:thermion_dart/thermion_dart.dart';
-import 'package:test/test.dart';
 
 void main() async {
   // TODO(c9b41bdf): restore once the gizmo API migration is finished.

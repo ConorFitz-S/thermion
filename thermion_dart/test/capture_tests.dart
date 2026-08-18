@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:ffi';
 import 'package:test/test.dart';
 import 'package:thermion_dart/thermion_dart.dart';
 

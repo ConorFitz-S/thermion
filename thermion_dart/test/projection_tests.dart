@@ -1,9 +1,7 @@
 @Timeout(const Duration(seconds: 600))
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:test/test.dart';
-import 'package:thermion_dart/src/utils/src/texture_projection.dart';
 import 'package:thermion_dart/thermion_dart.dart';
 import 'helpers.dart';
 

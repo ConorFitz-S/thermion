@@ -74,7 +74,7 @@ class Geometry {
     final numVertices = vertices.length ~/ 3;
     final expectedUvs = numVertices * 2;
     if (hasUVs && this.uvs.length != expectedUvs) {
-      throw Exception("Expected ${expectedUvs} UVs, got ${this.uvs!.length}");
+      throw Exception("Expected ${expectedUvs} UVs, got ${this.uvs.length}");
     }
 
     // Handle UV1 - ubershader requires two UV sets

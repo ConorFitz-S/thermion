@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:thermion_dart/thermion_dart.dart';
 import 'package:test/test.dart';
 import 'helpers.dart';

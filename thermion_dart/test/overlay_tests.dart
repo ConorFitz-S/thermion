@@ -1,6 +1,5 @@
 import 'package:test/test.dart';
 import 'package:thermion_dart/thermion_dart.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'helpers.dart';
 
 void main() async {

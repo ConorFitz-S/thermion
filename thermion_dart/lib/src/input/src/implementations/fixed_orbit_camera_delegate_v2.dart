@@ -150,7 +150,8 @@ class OrbitInputHandlerDelegate extends InputHandlerDelegate {
                     sensitivity.mouseSensitivity; // Invert X for natural feel
                 deltaElevation -=
                     dragDelta.y *
-                    sensitivity.mouseSensitivity; // Invert Y for natural feel
+                    sensitivity.mouseSensitivity *
+                    (sensitivity.invertVerticalOrbit ? -1 : 1);
                 _lastPointerPosition = localPosition;
               } else if (type == MouseEventType.hover) {
                 // Allow hover to set initial if not dragging

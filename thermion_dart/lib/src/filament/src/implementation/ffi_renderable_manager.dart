@@ -5,7 +5,6 @@ import 'package:thermion_dart/src/filament/src/implementation/ffi_material.dart'
 import 'package:thermion_dart/src/filament/src/implementation/ffi_vertex_buffer.dart';
 import 'package:thermion_dart/src/filament/src/implementation/ffi_index_buffer.dart';
 import 'package:thermion_dart/thermion_dart.dart';
-import 'ffi_filament_app.dart';
 
 /// FFI implementation of RenderableManager for native platforms.
 ///

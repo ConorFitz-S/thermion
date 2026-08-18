@@ -322,7 +322,7 @@ class GizmoAttachmentDelegate extends InputHandlerDelegate {
       ))[nearestBoneIndex];
       await attachTo(
         AttachmentTarget(
-          entity: boneEntity!,
+          entity: boneEntity,
           asset: asset,
           boneIndex: nearestBoneIndex,
           skinIndex: skinIndex,

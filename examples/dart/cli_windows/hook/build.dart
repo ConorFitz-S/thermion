@@ -9,7 +9,7 @@ void main(List<String> args) async {
   final logger = Logger("")
       ..level = Level.ALL
       ..onRecord.listen((record) => print(
-          record.message + "\n"));
+          "${record.message}\n"));
   await build(args, (BuildInput input, BuildOutputBuilder output) async {
     final targetOS = input.config.code.targetOS;
 

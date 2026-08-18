@@ -4,7 +4,6 @@ import 'package:thermion_dart/thermion_dart.dart';
 import 'package:test/test.dart';
 import 'helpers.dart';
 
-import 'package:thermion_dart/thermion_dart.dart';
 
 /// Visualizes bones with Blender-style head/tail shapes.
 ///

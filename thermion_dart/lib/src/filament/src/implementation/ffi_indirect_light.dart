@@ -1,7 +1,6 @@
 import 'package:thermion_dart/src/filament/src/implementation/ffi_filament_app.dart';
 import 'package:thermion_dart/src/filament/src/implementation/ffi_texture.dart';
 import 'package:thermion_dart/thermion_dart.dart';
-import 'ffi_filament_app.dart';
 
 class FFIIndirectLight extends IndirectLight {
   final Pointer<TEngine> engine;

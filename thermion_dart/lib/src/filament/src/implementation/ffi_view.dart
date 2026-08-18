@@ -678,7 +678,7 @@ class FFIView extends View<Pointer<TView>> {
       await _highlightOverlayManager!.setRenderTarget(this, renderTarget!);
       _logger.fine("Highlight overlay enabled (render target mode)");
     } else {
-      await _highlightOverlayManager!.setSwapChain(swapChains.first!);
+      await _highlightOverlayManager!.setSwapChain(swapChains.first);
       _logger.fine("Highlight overlay enabled (swapchain mode)");
     }
   }

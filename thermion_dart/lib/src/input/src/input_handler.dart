@@ -17,6 +17,7 @@ class InputSensitivityOptions {
   final double mousePanSensitivity;
   final double keySensitivity;
   final double scrollWheelSensitivity;
+  final bool invertVerticalOrbit;
 
   const InputSensitivityOptions({
     this.touchSensitivity = 0.001,
@@ -25,5 +26,6 @@ class InputSensitivityOptions {
     this.mousePanSensitivity = 0.01,
     this.scrollWheelSensitivity = 0.01,
     this.keySensitivity = 0.1,
+    this.invertVerticalOrbit = false,
   });
 }
